@@ -11,12 +11,10 @@ const passportConfig = () => {
     cb(null, obj);
   });
 
-  const client_id_github: string = "bbfa88c36b1da0120aaf";
-  const client_secret_github: string =
-    "4c80c7e311dbfa288a0c7218e5ea3267af5222d6";
-  const client_id_google: string =
-    "215024360667-e64iuu3pit9qhrihc7r7m51hhv7h3o43.apps.googleusercontent.com";
-  const client_secret_google: string = "FcM-R-T72_31mScReMllsfWE";
+  const client_id_github: string = process.env.CLIENT_ID_GITHUB || "";
+  const client_secret_github: string = process.env.CLIENT_SECRET_GITHUB || "";
+  const client_id_google: string = process.env.CLIENT_ID_GOOGLE || "";
+  const client_secret_google: string = process.env.CLIENT_SECRET_GOOGLE || "";
 
   // FOR github
 
