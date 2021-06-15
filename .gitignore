@@ -27,9 +27,12 @@ yarn-error.log*
 
 .env
 
-#env files
+# env files
 /client/.env
 /server/.env
+
+# dist folder
+/server/dist
 
 # vercel
 /client/.vercel

@@ -27,7 +27,6 @@ const passportConfig = () => {
         scope: ["user:email"],
       },
       async (accessToken: any, refreshToken: any, profile: any, cb: any) => {
-        console.log(profile);
         // try {
         //   const email = profile.emails[0].value;
         //   const data = await pool.query(
@@ -43,11 +42,10 @@ const passportConfig = () => {
         //     );
         //     user = user.rows[0];
         //   }
-        //   cb(null, {
-        //     user,
-        //     accessToken,
-        //     refreshToken,
-        //   });
+        cb(null, {
+          accessToken,
+          refreshToken,
+        });
         // } catch (error) {
         //   console.log(error);
         // }
@@ -65,8 +63,7 @@ const passportConfig = () => {
         callbackURL: "http://localhost:5000/auth/oauth/google",
       },
       async (accessToken: any, refreshToken: any, profile: any, cb: any) => {
-        const email = profile.emails[0].value;
-        console.log(profile);
+        // const email = profile.emails[0].value;
         // try {
         //   const data = await pool.query(
         //     `SELECT * FROM users WHERE(email = '${email}')`
@@ -80,11 +77,10 @@ const passportConfig = () => {
         //       `SELECT * FROM users WHERE(email = '${email}')`
         //     );
         //     user = user.rows[0];
-        //     cb(null, {
-        //       user,
-        //       accessToken,
-        //       refreshToken,
-        //     });
+        cb(null, {
+          accessToken,
+          refreshToken,
+        });
         //   }
         // } catch (error) {
         //   console.log(error);
