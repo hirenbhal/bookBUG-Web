@@ -1,14 +1,19 @@
+import "reflect-metadata";
 import express from "express";
+import { createServer } from "http";
+import { ApolloServer } from "apollo-server-express";
 import cors from "cors";
 import passport from "passport";
+import { buildSchema } from "type-graphql";
+import { HelloResolver } from "./resolvers/HelloResolver";
 import authRoutes from "./routes/auth";
-import logger from "morgan";
 import passportConfig from "./config/passportConfig";
 require("dotenv").config();
 
-const main = async () => {
-  const app = express();
+const app = express();
+const httpServer = createServer(app);
 
+const main = async () => {
   // for cookies
   app.set("trust proxy", 1);
 
@@ -19,7 +24,6 @@ const main = async () => {
     })
   );
   app.use(require("body-parser").urlencoded({ extended: true }));
-  app.use(logger("dev"));
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -29,13 +33,18 @@ const main = async () => {
   // routes
   app.use("/auth", authRoutes);
 
-  app.get("/", (_req, res) => {
-    res.send("hello");
+  const schema = await buildSchema({
+    resolvers: [HelloResolver],
+    validate: true,
   });
 
+  const apolloServer = new ApolloServer({ schema });
+
+  apolloServer.applyMiddleware({ app, cors: false });
+
   const PORT: number = Number(process.env.PORT) || 5000;
-  app.listen(5000, () => {
-    console.log(`Running on port ${PORT}`);
+  httpServer.listen(PORT, () => {
+    console.log(`Running on port http://localhost:${PORT}`);
   });
 };
 
