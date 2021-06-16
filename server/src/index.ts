@@ -11,6 +11,10 @@ import passportConfig from "./config/passportConfig";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import redis from "redis";
+import { createConnection } from "typeorm";
+import { MyContext } from "./config/types";
+import { UserResolver } from "./resolvers/UserResolver";
+import cookieParser from "cookie-parser";
 require("dotenv").config();
 
 const app = express();
@@ -24,6 +28,9 @@ let redisClient = redis.createClient({
 });
 
 const main = async () => {
+  // create database connection
+  await createConnection();
+
   // for cookies
   app.set("trust proxy", 1);
 
@@ -40,16 +47,18 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax", // csrf
       },
-      saveUninitialized: true,
+      saveUninitialized: false,
       secret: "fsdfjdasfijasfnsdfnwrjf",
       resave: false,
     })
   );
   app.use(
     cors({
-      origin: "http://localhost:3000/",
+      credentials: true,
+      origin: "http://localhost:3000",
     })
   );
+  app.use(cookieParser());
   app.use(require("body-parser").urlencoded({ extended: true }));
   app.use(passport.initialize());
 
@@ -64,16 +73,19 @@ const main = async () => {
   });
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver],
-    validate: true,
+    resolvers: [HelloResolver, UserResolver],
+    validate: false,
   });
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }) => ({ req, res, redisClient }),
+    context: ({ req, res }: MyContext) => {
+      // const token = req.cookies["qid"] || "";
+      return { req, res };
+    },
   });
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({ cors: false, app });
 
   const PORT: number = Number(process.env.PORT) || 5000;
   httpServer.listen(PORT, () => {

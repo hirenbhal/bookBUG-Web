@@ -1,6 +1,15 @@
 import passport from "passport";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Users } from "../entities/User";
+
+interface userInterface {
+  displayName: string;
+  username: string;
+  email: string;
+  photoUrl: string;
+  bio: string;
+}
 
 const passportConfig = () => {
   passport.serializeUser(function (user, cb) {
@@ -27,28 +36,29 @@ const passportConfig = () => {
         scope: ["user:email"],
       },
       async (accessToken: any, refreshToken: any, profile: any, cb: any) => {
-        // try {
-        //   const email = profile.emails[0].value;
-        //   const data = await pool.query(
-        //     `SELECT * FROM users WHERE(email = '${email}')`
-        //   );
-        //   let user = data.rows[0];
-        //   if (!user) {
-        //     await pool.query(
-        //       `INSERT INTO users VALUES('${uuidv4()}', 'mahaveer', '${email}')`
-        //     );
-        //     user = await pool.query(
-        //       `SELECT * FROM users WHERE(email = '${email}')`
-        //     );
-        //     user = user.rows[0];
-        //   }
+        const email: string = profile.emails[0].value;
+        const photoUrl: string = profile.photos[0].value;
+        const curUser: userInterface = {
+          displayName: "",
+          username: "",
+          email: email,
+          photoUrl: photoUrl,
+          bio: "",
+        };
+        let user = await Users.findOne({ email: email });
+        if (user !== undefined) {
+          return cb(null, {
+            user,
+            accessToken,
+            refreshToken,
+          });
+        }
+        user = await Users.create(curUser).save();
         cb(null, {
+          user,
           accessToken,
           refreshToken,
         });
-        // } catch (error) {
-        //   console.log(error);
-        // }
       }
     )
   );
@@ -63,28 +73,29 @@ const passportConfig = () => {
         callbackURL: "http://localhost:5000/auth/oauth/google",
       },
       async (accessToken: any, refreshToken: any, profile: any, cb: any) => {
-        // const email = profile.emails[0].value;
-        // try {
-        //   const data = await pool.query(
-        //     `SELECT * FROM users WHERE(email = '${email}')`
-        //   );
-        //   let user = data.rows[0];
-        //   if (!user) {
-        //     await pool.query(
-        //       `INSERT INTO users VALUES('${uuidv4()}', 'mahaveer', '${email}')`
-        //     );
-        //     user = await pool.query(
-        //       `SELECT * FROM users WHERE(email = '${email}')`
-        //     );
-        //     user = user.rows[0];
+        const email: string = profile.emails[0].value;
+        const photoUrl: string = profile.photos[0].value;
+        const curUser: userInterface = {
+          displayName: "",
+          username: "",
+          email: email,
+          photoUrl: photoUrl,
+          bio: "",
+        };
+        let user = await Users.findOne({ email: email });
+        if (user !== undefined) {
+          return cb(null, {
+            user,
+            accessToken,
+            refreshToken,
+          });
+        }
+        user = await Users.create(curUser).save();
         cb(null, {
+          user,
           accessToken,
           refreshToken,
         });
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        // }
       }
     )
   );

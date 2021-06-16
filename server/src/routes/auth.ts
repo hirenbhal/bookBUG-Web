@@ -1,13 +1,9 @@
 import express from "express";
 const router = express.Router();
 import passport from "passport";
-import { ensureAuthenticated, backAuthenticated } from "../middleware";
+import { backAuthenticated } from "../middleware";
 
-router.get(
-  "/github",
-  backAuthenticated,
-  passport.authenticate("github", { session: false })
-);
+router.get("/github", passport.authenticate("github", { session: false }));
 
 router.get(
   "/google",
@@ -20,14 +16,16 @@ router.get(
 router.get(
   "/oauth/github",
   backAuthenticated,
-  passport.authenticate("github", { failureRedirect: "/" }),
+  passport.authenticate("github", { session: false }),
   (req: any, res) => {
-    // console.log(req.user);
-    // req.session.userID = req.user.user.id;
-    // req.session.name = req.user.user.name;
-    // req.session.email = req.user.user.email;
-    // req.session.accessToken = req.user.accessToken;
-    // req.session.refreshToken = req.user.refreshToken;
+    req.session.userID = req.user.user.id;
+    req.session.displayName = req.user.user.displayName;
+    req.session.username = req.user.user.username;
+    req.session.photoUrl = req.user.user.photoUrl;
+    req.session.bio = req.user.user.bio;
+    req.session.email = req.user.user.email;
+    req.session.accessToken = req.user.accessToken;
+    req.session.refreshToken = req.user.refreshToken;
 
     // Successful authentication, redirect home.
     res.redirect("http://localhost:3000/");
@@ -39,20 +37,18 @@ router.get(
   backAuthenticated,
   passport.authenticate("google", { failureRedirect: "/" }),
   (req: any, res) => {
-    // req.session.userID = req.user.user.id;
-    // req.session.name = req.user.user.name;
-    // req.session.email = req.user.user.email;
-    // req.session.accessToken = req.user.accessToken;
-    // req.session.refreshToken = req.user.refreshToken;
+    req.session!.userID = req.user.user.id;
+    req.session.displayName = req.user.user.displayName;
+    req.session.username = req.user.user.username;
+    req.session.photoUrl = req.user.user.photoUrl;
+    req.session.bio = req.user.user.bio;
+    req.session.email = req.user.user.email;
+    req.session.accessToken = req.user.accessToken;
+    req.session.refreshToken = req.user.refreshToken;
 
     // Successful authentication, redirect home.
     res.redirect("http://localhost:3000/");
   }
 );
-
-router.get("/logout", ensureAuthenticated, (req: any, res) => {
-  req.session = null;
-  res.redirect("http://localhost:3000/");
-});
 
 export default router;
